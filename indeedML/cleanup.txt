@@ -1,0 +1,57 @@
+part-time
+part time
+
+full-time
+full time
+
+full time or part time
+
+hourly-wage
+salary
+
+
+associate
+bs degree
+ms degree
+phd
+
+bachelors degree
+
+bachelors degree
+bachelor degree
+bachelor s degree
+bs degree
+baccalaureate degree
+college degree
+undergraduate degree
+engineering degree
+bs degree
+accounting degree
+ba or bs degree
+
+masters degree
+ms degree
+md, phd, pharmd
+mba degree
+
+associates degree
+high school degree
+high school diploma 
+associate adn
+diploma or ged
+high school diploma or general education degree ged
+
+
+
+licence
+
+1-year-experience
+2-4-years-experience
+5-plus-years-experience
+
+supervise
+
+
+Synonyms:
+
+{'licence', 'parttime', 'oversee', 'supervise', 'license',  'earnings', 'full-time', 'wage', 'permit', 'pay', 'monitor',  'salary', 'hourly', 'half-time', 'manage', 'degree', 'remuneration', 'part-time', 'superintend', 'supervisory' , 'supervising'}
