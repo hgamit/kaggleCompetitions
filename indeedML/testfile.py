@@ -1,6 +1,5 @@
 '''
 Created on Apr 4, 2017
-
 @author: HGamit
 '''
 
@@ -30,9 +29,9 @@ replacements = {'one':'1',
                 'ten':'10'}
 
 
-os.chdir("D:\\Build\\ML\\comp\\indeed")
+os.chdir("D:\\Machine\\hacker-indeed")
 
-train_df = pd.read_table("train.tsv")
+train_df = pd.read_table("train.tsv", nrows=20)
 #print(train_df.head())
 #train_df = train_df.head()
 
@@ -74,12 +73,58 @@ class Test(object):
     def replace(self, match):
         return replacements[match.group(0)]
     
+
+    def RepresentsInt(self, s):
+        try: 
+            int(s)
+            return True
+        except ValueError:
+            return False
+
+
+    def remove_numbers(self, string):
+        words = string.split()
+        for word in words:
+            if(self.RepresentsInt(word) and int(word)>50):
+                string = re.sub(word, ' ', string)
+        string = re.sub(' +', ' ', string)
+        return string
+
+
     def basic_cleaning(self, string):
         string = str(string)
         string = string.lower()
+        string = re.sub('year', ' years ', string)
+        string = re.sub('month', ' months ', string)
+        string = re.sub(' +', ' ', string)
+        string = re.sub('([0-9]*).?to.?([0-9]*)', ' \2-\3 ', string)
+        string = re.sub('([0-9]*) *\- *([0-9]*)', ' \2-\3 ', string)
+        searchStr = "((at least|Minimum)? ?(([0-9]*)(\+?|\-[0-9]*)?) (months|years) ?\+?)"
+        match = re.search(searchStr, string)
+        #print(match)
+        if match:
+            num = match.group(4)
+            gr6 = match.group(6)
+            print(str(num))
+            print(str(gr6))
+
+        if(num != None and gr6!= None):
+            if(int(num)>4 and str(gr6)==' years '):
+                string = re.sub('((at least|Minimum)? ?([0-9]*(\+?|\-[0-9]*)?) (months|years) ?\+?)', ' 5+ years ', string)
+            elif(int(num)>2 and str(gr6) ==' years '):
+                string = re.sub('((at least|Minimum)? ?([0-9]*(\+?|\-[0-9]*)?) (months|years) ?\+?)', ' 2-4 years ', string)
+            else:
+                string = re.sub('((at least|Minimum)? ?([0-9]*(\+?|\-[0-9]*)?) (months|years) ?\+?)', ' 1+ years ', string)
+            
         string = re.sub('|'.join(r'\b%s\b' % re.escape(s) for s in replacements), self.replace, string) 
-        string = re.sub('[\(\)\_\^\%\$\.\\+\/\*\'\'\"\{\}\[\]\\/]+', ' ', string)
+        string = re.sub('(bachelor(s|.s)?|baccalaureate|(bs|ba)|college|undergraduate|engineering|accounting)( degree)?', ' bachelors degree ', string)
+        string = re.sub('(master(s|.s)?|(ms|ma|mba))( degree)?', ' masters degree ', string)
+        string = re.sub('(md|phd|pharmd)', ' phd ', string)
+        string = re.sub('(associate(s|.s)? |high school |general education |(adn|ged|diploma))(diploma|degree)?', ' associates degree ', string)
+        string = re.sub('(licence|license)', ' license ', string)
+        string = re.sub('[\(\)\_\^\%\$\.\,\\\!\&\/\*\:\;\'\'\"\{\}\[\]\\/]+', ' ', string)
         string = ' '.join([i for i in string.split() if i not in ["a", "and", "of", "the", "to", "on", "in", "at", "is"] and i not in eng_stopwords])
+        string = self.remove_numbers(string)
         string = re.sub(' +', ' ', string)
         return string
     
@@ -152,7 +197,7 @@ train_df['1-year-experience-needed']=0
 train_df['2-4-years-experience-needed']=0
 train_df['5-plus-years-experience-needed']=0
 train_df['supervising-job']=0
-train_df['licence-word']=0
+#train_df['licence-word']=0
 
 
 for i,row in train_df.iterrows():
@@ -193,22 +238,6 @@ x_train = pd.DataFrame(data = {'text':[], 'label':[]})
 
 #train_dict = {}
 
-def RepresentsInt(s):
-    try: 
-        int(s)
-        return True
-    except ValueError:
-        return False
-
-
-def remove_numbers(string):
-    words = string.split()
-    for word in words:
-        if(RepresentsInt(word) and int(word)>50):
-            string = re.sub(word, ' ', string)
-    string = re.sub(' +', ' ', string)
-    return string
-
 
 
 for row in train_df.iterrows():
@@ -216,11 +245,7 @@ for row in train_df.iterrows():
     tra = myCall.basic_cleaning(row[1]['description'])
     with open("file.txt", "w") as text_file:
         print("{}".format(tra.encode("ascii", "ignore")), file=text_file)
-    
-    
-    
-    
-    
+
     
     #nf = [x for x in search_words if x in desc.split()]
     #if(len(nf)):
@@ -267,31 +292,3 @@ with open('license.json', 'r') as fp:
         #print("{}".format(i.encode("ascii", "ignore")), file=text_file)
 #print(myCall.corpus_synonym(search_words))
 
-
-def basic_cleaning(string):
-    string = str(string)
-    string = string.lower()
-    string = re.sub('year', ' years ', string)
-	string = re.sub('month', ' months ', string)
-	string = re.sub('([0-9]*).?to.?([0-9]*)', ' \2-\3 ', string)
-    string = re.sub('([0-9]*) *\- *([0-9]*)', ' \2-\3 ', string)
-    match = re.search('((at least|Minimum)? ?([0-9]*(\+?|\-[0-9]*)?) (months|years) ?\+?)', string)
-    num = match.group(2) if match else None
-	gr5 = match.group(5) if match else None
-    if(num>4 and gr5=='years'):
-        string = re.sub('((at least|Minimum)? ?([0-9]*(\+?|\-[0-9]*)?) (months|years) ?\+?)', ' 5+ years ', string)
-    elif(num>2 and gr5=='years'):
-        string = re.sub('((at least|Minimum)? ?([0-9]*(\+?|\-[0-9]*)?) (months|years) ?\+?)', ' 2-4 years ', string)
-    else:
-        string = re.sub('((at least|Minimum)? ?([0-9]*(\+?|\-[0-9]*)?) (months|years) ?\+?)', ' 1+ years ', string)
-    string = re.sub('|'.join(r'\b%s\b' % re.escape(s) for s in replacements), replace, string) 
-    string = re.sub('(bachelor(s|.s)?|baccalaureate|(bs|ba)|college|undergraduate|engineering|accounting)( degree)?', ' bachelors degree ', string)
-    string = re.sub('(master(s|.s)?|(ms|ma|mba))( degree)?', ' masters degree ', string)
-    string = re.sub('(md|phd|pharmd)', ' phd ', string)
-    string = re.sub('(associate(s|.s)? |high school |general education |(adn|ged|diploma))(diploma|degree)?', ' associates degree ', string)
-    string = re.sub('(licence|license)', ' license ', string)
-    string = re.sub('[\(\)\_\^\%\$\.\,\\\!\&\/\*\:\;\'\'\"\{\}\[\]\\/]+', ' ', string)
-    string = ' '.join([i for i in string.split() if i not in ["a", "and", "of", "the", "to", "on", "in", "at", "is"] and i not in eng_stopwords])
-    string = remove_numbers(string)
-    string = re.sub(' +', ' ', string)
-    return string
